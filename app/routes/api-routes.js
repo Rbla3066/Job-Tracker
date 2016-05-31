@@ -18,7 +18,7 @@ function getJobDetails(i, jobs, callback){
 	var lonDif = Math.abs(parseInt(jobs[i].location.longitude) + 74.987929);
 	var distance = Math.floor(Math.sqrt((latDif * latDif) + (lonDif * lonDif)) * 60);
 	var post = moment(jobs[i].post_date.unix.replace(/'T'/g, " ").substring(0, 19));
-	jobs[i]["display_time"] = post.format('MMM Do, YYYY')
+	jobs[i]["display_time"] = post.format('MMM Do')
 	jobs[i]["distance_miles"] = distance;
 	if((!jobs[i].location.city_state || !jobs[i].location.formal_address) && jobs[i].location.latitude && jobs[i].location.longitude){
 		console.log(jobs[i].location.latitude + jobs[i].location.longitude)
@@ -43,7 +43,6 @@ function getJobDetails(i, jobs, callback){
 }
 
 module.exports = function(app){
-	
 	app.get('/api/jobs', function(req, res){
 		orm.findAll(function(err, jobs){
 			if(err) return res.json(404);
@@ -58,22 +57,33 @@ module.exports = function(app){
 			})
 		})
 	})
-	app.post('/api/location', function(req, res){
-		geocoder.reverseGeocode( req.body.latitude, req.body.longitude,  function ( err, data ) {
-			if(err){
-				res.json("Error: "+err);
-				
-			} else {
-				req.user.location = {
-					longitude: req.body.longitude,
-					latitude: req.body.latitude
-				};
-				if(data.results[0] != undefined){
-					req.user.location["address"] = data.results[0].formatted_address
-				}
-				res.json(req.user);
-			};
-		});
-	});
+	app.get('/api/undelete', function(req, res){
+		orm.unDelete(function(err, result){
 
+			if(err) throw err;
+			
+			res.send('success');
+		})
+	})
+	app.get('/api/delete/:id', function(req, res){
+		var id = req.params.id;
+		orm.deleteJob(id, function(err, result){
+			if(err) throw err;
+			res.redirect('/');
+		});
+	})
+	app.get('/api/star/:id', function(req, res){
+		var id = req.params.id;
+		orm.starJob(id, function(err, result){
+			if(err) throw err;
+			res.redirect('/');
+		});
+	})
+	app.get('/api/unstar/:id', function(req, res){
+		var id = req.params.id;
+		orm.unStarJob(id, function(err, result){
+			if(err) throw err;
+			res.redirect('/');
+		});
+	})
 };

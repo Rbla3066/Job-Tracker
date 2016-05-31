@@ -13,9 +13,11 @@ var db = mongojs('mongodb://rbla3066:Coolbeans777@ds019633.mlab.com:19633/heroku
 
 
 
+
 module.exports = {
 	findAll : function(callback){
-		db.jobs.find(function(err, docs){
+		db.jobs.find({deleted: false}, function(err, docs){
+			console.log(docs)
 			if(err){
 				return callback(err, null);
 			} else {
@@ -63,6 +65,26 @@ module.exports = {
 	},
 	updateJob: function(job, callback){
 		db.jobs.update({'href': job.href}, {$set: job}, function(err, res){
+			callback(err, res);
+		})
+	},
+	deleteJob: function(id, callback){
+		db.jobs.update({_id: mongojs.ObjectId(id)}, {$set: {"deleted" : true}}, function(err, res){
+			callback(err, res);
+		})
+	},
+	starJob: function(id, callback){
+		db.jobs.update({_id: mongojs.ObjectId(id)}, {$set: {star : true}}, function(err, res){
+			callback(err, res);
+		})
+	},
+	unStarJob: function(id, callback){
+		db.jobs.update({_id: mongojs.ObjectId(id)}, {$set: {star : false}}, function(err, res){
+			callback(err, res);
+		})
+	},
+	unDelete: function(callback){
+		db.jobs.update({}, {$set: {deleted : false, star : false}}, {multi: true}, function(err, res){
 			callback(err, res);
 		})
 	},

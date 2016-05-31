@@ -35,6 +35,12 @@
 		p:hover {
 			color: #94ad34;
 		}
+		#container{
+			overflow: hidden;
+		}
+		.star{
+			background-color: yellow;
+		}
 	</style>
 	<link rel="stylesheet" href="jquery-ui.theme.min.css">
 	<link rel="stylesheet" href="jquery-ui.min.css">
@@ -44,7 +50,7 @@
 </head>
 
 <body>
-	<div class="ui-widget">
+	<div id='container' class="ui-widget">
 		<div class="ui-widget-header ui-state-active" id="header" style="text-align: center">
 		<br>
 			<h1 class="header-text"> Web Developement Jobs </h1>
@@ -83,6 +89,8 @@ $(document).ready(function(){
 			var distance = "";
 			var map = "";
 			var flag = "";
+			var star = "";
+			var stared = "<a href='/api/star/"+jobs[i]._id+"'><button class='star_button'></button></a>";
 			if(jobs[i].href.substring(0, 2) == "//"){
 				link = "https:" + jobs[i].href;	
 			} else {
@@ -95,9 +103,13 @@ $(document).ready(function(){
 			} else {
 				flag = "<button class='flag_button' data-href='"+jobs[i].href+"'></button>";
 			}
+			if(jobs[i].star) {
+				star = "<span class='ui-icon ui-icon-star star'></span> ";
+				stared = "<a href='/api/unstar/"+jobs[i]._id+"'><button class='un_star_button'>Unstar</button></a>";
+			}
 			if(jobs[i].location.latitude) map = "<button data-lon='"+jobs[i].location.longitude+"' data-lat='"+jobs[i].location.latitude+"' class='map_button'></button>"
 			if(jobs[i].distance_miles) distance = " (" + jobs[i].distance_miles + " miles) "
-			$("#fragment-"+page).append("<h3><span>"+(i+1)+".) "+jobs[i].job_title + city + "</span> <span class='date'>"+jobs[i].display_time+"</span></h3><div><span class='buttons ui-state-highlight'><button class='star_button' data-id='"+jobs[i].id+"'></button>"+map+email+flag+"<button class='trash_button'></button></span><h4>"+address + distance +"</h4><p>"+jobs[i].info.replace(/\n/g, "</p><p>")+"</p><a href='"+link+"'><h4>Full Listing</h4></a></div>");
+			$("#fragment-"+page).append("<h3><span style='width: 125px'>"+jobs[i].job_title + city + star+"</span> <span class='date'>"+jobs[i].display_time+"</span></h3><div><span class='buttons ui-state-highlight'>"+stared+map+email+flag+"<a href='/api/delete/"+jobs[i]._id+"'><button class='trash_button'></button></a></span><h4>"+address + distance +"</h4><p>"+jobs[i].info.replace(/\n/g, "</p><p>")+"</p><a href='"+link+"'><h4>Full Listing</h4></a></div>");
 			
 		};
 		
@@ -172,6 +184,12 @@ $(document).ready(function(){
 		$('.star_button').each(function(i, elem){
 			$(this).button({
 			label: "Star",
+			icons: {primary: 'ui-icon-star'}
+			});
+		})
+		$('.un_star_button').each(function(i, elem){
+			$(this).button({
+			label: "Unstar",
 			icons: {primary: 'ui-icon-star'}
 			});
 		})

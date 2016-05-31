@@ -27,7 +27,7 @@ function getInfo(i, hrefs){
 					return getInfo(i+1, hrefs);
 				};
 				var $ = cheerio.load(html);
-				var job = {"href": hrefs[i]};
+				var job = {"href": hrefs[i], "deleted": false, "star": false};
 
 				var postedFull = $('.timeago').attr('datetime');
 				if(postedFull != undefined){
