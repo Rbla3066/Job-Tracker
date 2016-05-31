@@ -14,7 +14,8 @@ app.use(express.static('./app/public'));
 
 
 app.get('/api/startcrawl', function(req, res){
-		crawler()
+		crawler();
+		res.send("success");
 	})
 require('./app/routes/api-routes.js')(app);
 require('./app/routes/html-routes.js')(app); 
