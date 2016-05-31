@@ -13,6 +13,7 @@ var moment = require('moment');
 function getJobDetails(i, jobs, callback){
 	//40.735492, -74.987929
 	if(i == jobs.length) return callback(null, jobs);
+	if(jobs[i].location == undefined) return(getJobDetails(i+1, jobs, callback))
 	var latDif = Math.abs(parseInt(jobs[i].location.latitude) - 40.735492);
 	var lonDif = Math.abs(parseInt(jobs[i].location.longitude) + 74.987929);
 	var distance = Math.floor(Math.sqrt((latDif * latDif) + (lonDif * lonDif)) * 60);
@@ -46,6 +47,7 @@ module.exports = function(app){
 	app.get('/api/jobs', function(req, res){
 		orm.findAll(function(err, jobs){
 			if(err) return res.json(404);
+			if(jobs.length == 0) return res.json("fail")
 			getJobDetails(0, jobs, function(err, newjobs){
 				newjobs.sort(function(a,b){
 				var c = new Date(a.post_date.unix);
