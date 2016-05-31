@@ -1,7 +1,7 @@
 var mongojs = require('mongojs');
-var db = mongojs('mongodb://localhost:27017/jobfinder', ['jobs']);
+var db = mongojs('mongodb://<heroku_ss3lpvpd>:<Coolbeans777>@ds019633.mlab.com:19633/heroku_ss3lpvpd', ['jobs']);
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/jobfinder');
+mongoose.connect('mongodb://<heroku_ss3lpvpd>:<Coolbeans777>@ds019633.mlab.com:19633/heroku_ss3lpvpd');
 
 //var Job = mongoose.model('Job', {
 //   job_title: {type: String, default: 'unknown'},
