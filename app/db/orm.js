@@ -63,6 +63,18 @@ module.exports = {
 			});
 		};
 	},
+	sendHref: function(id, callback){
+		db.jobs.find({_id: mongojs.ObjectId(id)}, function(err, res){
+			if(err) return callback(err);
+			var href = 'https:'
+			if(res[0].href.substring(0, 2) == '//'){
+				href += res[0].href;
+			} else {
+				href += '//newjersey.craigslist.org' + res[0].href;
+			};
+			callback(null, href);
+		})
+	},
 	updateJob: function(job, callback){
 		db.jobs.update({'href': job.href}, {$set: job}, function(err, res){
 			callback(err, res);

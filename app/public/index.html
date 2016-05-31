@@ -76,8 +76,12 @@ $(document).ready(function(){
 		at: "center",
 		of: "#header"
 	})
-	
-
+	$('body').on('click', '.map_button', function(){
+		var elem = $(this);
+		$.get('/api/map/'+elem.data('id'), function(res){
+			elem.html(res);
+		})
+	})
 	function getJobs(page){
 		$(".fragments").append("<li><a href='#fragment-"+page+"'><span>"+page+"</span></a></li>")
 		$("#tabs").append("<div class='ui-widget-content accordian' id='fragment-"+page+"'></div>")
@@ -107,7 +111,7 @@ $(document).ready(function(){
 				star = "<span class='ui-icon ui-icon-star star'></span> ";
 				stared = "<a href='/api/unstar/"+jobs[i]._id+"'><button class='un_star_button'>Unstar</button></a>";
 			}
-			if(jobs[i].location.latitude) map = "<button data-lon='"+jobs[i].location.longitude+"' data-lat='"+jobs[i].location.latitude+"' class='map_button'></button>"
+			if(jobs[i].location.latitude) map = "<button data-id='"+jobs[i]._id+"' data-lon='"+jobs[i].location.longitude+"' data-lat='"+jobs[i].location.latitude+"' class='map_button'></button>"
 			if(jobs[i].distance_miles) distance = " (" + jobs[i].distance_miles + " miles) "
 			$("#fragment-"+page).append("<h3><span style='width: 125px'>"+jobs[i].job_title + city + star+"</span> <span class='date'>"+jobs[i].display_time+"</span></h3><div><span class='buttons ui-state-highlight'>"+stared+map+email+flag+"<a href='/api/delete/"+jobs[i]._id+"'><button class='trash_button'></button></a></span><h4>"+address + distance +"</h4><p>"+jobs[i].info.replace(/\n/g, "</p><p>")+"</p><a href='"+link+"'><h4>Full Listing</h4></a></div>");
 			
@@ -138,15 +142,18 @@ $(document).ready(function(){
 			collapsable: true,
 			event: "click",
 			activate: function(event, ui){
-
-				$('.buttons').each(function(i, elem){
+				$('html, body').animate({
+    			    scrollTop: ui.newHeader.offset().top - 40
+    			}, 1000);
+			$('.buttons').each(function(i, elem){
 				$(this).position({
 				my: "right top",
 				at: "right top",
 				of: $(this).parent(),
 				collision: "none"
+				})
 			})
-		})
+
 			}
 			});
 		})

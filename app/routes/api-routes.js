@@ -2,6 +2,8 @@
 var orm = require('./../db/orm.js');
 var key = require('./../db/keys/google.js');
 var NodeGeocoder = require('node-geocoder');
+var request = require('request');
+var cheerio = require('cheerio');
 var options = {
   provider: 'google',
   apiKey: key, 
@@ -21,10 +23,8 @@ function getJobDetails(i, jobs, callback){
 	jobs[i]["display_time"] = post.format('MMM Do')
 	jobs[i]["distance_miles"] = distance;
 	if((!jobs[i].location.city_state || !jobs[i].location.formal_address) && jobs[i].location.latitude && jobs[i].location.longitude){
-		console.log(jobs[i].location.latitude + jobs[i].location.longitude)
 		geocoder.reverse({lat: jobs[i].location.latitude, lon: jobs[i].location.longitude})
 		.then(function(data){
-			console.log(data)
 			if(data[0] != undefined && data[0].formattedAddress) jobs[i].location["formal_address"] = data[0].formattedAddress;
 			if(data[0] != undefined && data[0].city && data[0].administrativeLevels) jobs[i].location["city_state"] = data[0].city + ", " + data[0].administrativeLevels.level1short;
 			orm.updateJob(jobs[i], function(err, res){
@@ -55,6 +55,23 @@ module.exports = function(app){
 				});
 				res.json(newjobs);
 			})
+		})
+	})
+	app.get('/api/map/:id', function(req, res){
+		var id = req.params.id;
+		orm.sendHref(id, function(err, result){
+			if(err) throw err;
+			if(result){
+				request(result, function(err, response, html){
+					var $ = cheerio.load(html);
+					var map = $('.mapbox');
+					if(map){
+						res.send("<div class='mapbox'>"+map.html()+"</div>")
+					} else {
+						res.send('not found');
+					}
+				})
+			}
 		})
 	})
 	app.get('/api/undelete', function(req, res){
