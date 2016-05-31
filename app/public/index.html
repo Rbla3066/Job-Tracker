@@ -1,0 +1,30 @@
+
+<html>
+<head>
+	<title>Job Finder</title>
+	<link rel="stylesheet" href="jquery-ui.theme.min.css">
+	<link rel="stylesheet" href="jquery-ui.min.css">
+	<link rel="stylesheet" href="jquery-ui.structure.min.css">
+</head>
+
+<body>
+	<div id="accordian">
+	</div> 
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="jquery-ui.js"></script>
+<script type="text/javascript">
+	$(document).ready(function(){
+		var url = window.location.origin;
+		$.get(url + "/api/jobs", function(jobs){
+			for(var i=0; i<jobs.length && i<20; i++){
+				$("#accordian").append("<h3><span>"+jobs[i].job_title+"</span> "+jobs[i].display_time+"</h3><div><h4>"+jobs[i].location.formal_address+"</h4>"+jobs[i].info+"</div>")
+			};
+			$("#accordian").accordion();
+		})
+	})
+
+
+</script>
+
+</body>
+</html>
