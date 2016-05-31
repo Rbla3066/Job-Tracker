@@ -2,26 +2,132 @@
 <html>
 <head>
 	<title>Job Finder</title>
+	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="jquery-ui.min.js"></script>
+
 	<link rel="stylesheet" href="jquery-ui.theme.min.css">
-	<link rel="stylesheet" href="jquery-ui.min.css">
 	<link rel="stylesheet" href="jquery-ui.structure.min.css">
+
+	
 </head>
 
 <body>
-	<div id="accordian">
+	<div class="ui-widget">
+		<div class="ui-widget-header ui-state-active" id="header" style="text-align: center">
+		<br>
+			<h1 class="header-text"> Web Developement Jobs </h1>
+			<br>
+		</div>
+	<div class="ui-widget-content">
+		<div id="tabs">
+			<span>
+			<ul class='fragments'>
+			</ul>
+			</span>
+		</div>
+	</div>	
+
 	</div> 
-<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-<script src="jquery-ui.js"></script>
 <script type="text/javascript">
-	$(document).ready(function(){
-		var url = window.location.origin;
-		$.get(url + "/api/jobs", function(jobs){
-			for(var i=0; i<jobs.length && i<20; i++){
-				$("#accordian").append("<h3><span>"+jobs[i].job_title+"</span> "+jobs[i].display_time+"</h3><div><h4>"+jobs[i].location.formal_address+"</h4>"+jobs[i].info+"</div>")
-			};
-			$("#accordian").accordion();
-		})
+$(document).ready(function(){
+	var url = window.location.origin;
+	var jobs;
+	var page = 1;
+	$(".header-text").position({
+		my: "center",
+		at: "center",
+		of: "#header"
 	})
+	
+
+	function getJobs(page){
+		$(".fragments").append("<li><a href='#fragment-"+page+"'><span>"+page+"</span></a></li>")
+		$("#tabs").append("<div class='ui-widget-content accordian' id='fragment-"+page+"'></div>")
+		for(var i= (page - 1) * 20; i<jobs.length && i<(page * 20); i++){
+			var email = "";
+			var address = "";
+			var link = "";
+			var city = "";
+			var distance = "";
+			if(jobs[i].href.substring(0, 2) == "//"){
+				link = "https:" + jobs[i].href;	
+			} else {
+				link = "https://newjersey.craigslist.org" + jobs[i].href;
+			};
+			if(jobs[i].location.city_state) city = " (" + jobs[i].location.city_state + ") ";
+			if(jobs[i].location.formal_address) address = jobs[i].location.formal_address;
+			if(jobs[i].email_address) email = "<a href='mailto:"+jobs[i].email_address+"'><button class='email_button' style='margin-bottom: -25px'>E-Mail</button></a>";
+			if(jobs[i].distance_miles) distance = " (" + jobs[i].distance_miles + " miles) "
+			$("#fragment-"+page).append("<h3><span>"+(i+1)+".) "+jobs[i].job_title + city + "</span> <span class='date'>"+jobs[i].display_time+"</span></h3><div><span class='buttons ui-state-active'>"+email+"<button class='trash_button' style='margin-bottom: -25px'></button></span><h4>"+address + distance +"</h4><p>"+jobs[i].info.replace(/\n/g, "</p><p>")+"</p><a href='"+link+"'><h4>Full Listing</h4></a></div>");
+			
+		};
+		
+	};
+	$.get(url + "/api/jobs", function(res){
+		jobs = res;
+		$('body').append("<div ")
+		for(var i=1; i<(res.length/20)+1; i++){
+			getJobs(i);
+		};
+		$("#tabs").tabs({
+			active: 0,
+			activate: function(event, ui){
+				$(".date").each(function(i,elem){
+					$(this).position({
+					my: "right center",
+					at: "right center",
+					of: $(this).parent()
+					});
+				})
+			}
+		});
+		$(".accordian").each(function(i, elem){
+			$(this).accordion({
+			heightStyle: "content",
+			collapsable: true,
+			event: "click",
+			activate: function(event, ui){
+				$('.buttons').each(function(i, elem){
+				$(this).position({
+				my: "right top",
+				at: "right top",
+				of: $(this).parent(),
+				collision: "none"
+			})
+		})
+			}
+			});
+		})
+		$(".date").each(function(i,elem){
+			$(this).position({
+			my: "right center",
+			at: "right center",
+			of: $(this).parent()
+			});
+		})
+		$('.email_button').each(function(i, elem){
+			$(this).button({
+			label: "E-mail",
+			icons: {primary: 'ui-icon-mail-closed'}
+			});
+		})
+		$('.trash_button').each(function(i, elem){
+			$(this).button({
+			label: "Delete",
+			icons: {primary: 'ui-icon-trash'}
+			});
+		})
+		$('.buttons').each(function(i, elem){
+			$(this).position({
+				my: "right top",
+				at: "right top",
+				of: $(this).parent()
+			})
+		})
+		
+	})
+	
+})
 
 
 </script>

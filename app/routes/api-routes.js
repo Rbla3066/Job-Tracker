@@ -1,6 +1,13 @@
 
-var geocoder = require('geocoder');
 var orm = require('./../db/orm.js');
+var key = require('./../db/keys/google.js');
+var NodeGeocoder = require('node-geocoder');
+var options = {
+  provider: 'google',
+  apiKey: key, 
+  formatter: null
+};
+var geocoder = NodeGeocoder(options);
 var moment = require('moment');
 
 function getJobDetails(i, jobs, callback){
@@ -10,19 +17,26 @@ function getJobDetails(i, jobs, callback){
 	var lonDif = Math.abs(parseInt(jobs[i].location.longitude) + 74.987929);
 	var distance = Math.floor(Math.sqrt((latDif * latDif) + (lonDif * lonDif)) * 60);
 	var post = moment(jobs[i].post_date.unix.replace(/'T'/g, " ").substring(0, 19));
-	jobs[i]["display_time"] = post.format('MMM Do, YYYY HH:mm')
+	jobs[i]["display_time"] = post.format('MMM Do, YYYY')
 	jobs[i]["distance_miles"] = distance;
-	if(jobs[i].location.latitude && jobs[i].location.longitude){
-		geocoder.reverseGeocode(jobs[i].location.latitude, jobs[i].location.longitude, function(err, data){
-			if(err) {
-				console.log(err);
+	if((!jobs[i].location.city_state || !jobs[i].location.formal_address) && jobs[i].location.latitude && jobs[i].location.longitude){
+		console.log(jobs[i].location.latitude + jobs[i].location.longitude)
+		geocoder.reverse({lat: jobs[i].location.latitude, lon: jobs[i].location.longitude})
+		.then(function(data){
+			console.log(data)
+			if(data[0] != undefined && data[0].formattedAddress) jobs[i].location["formal_address"] = data[0].formattedAddress;
+			if(data[0] != undefined && data[0].city && data[0].administrativeLevels) jobs[i].location["city_state"] = data[0].city + ", " + data[0].administrativeLevels.level1short;
+			orm.updateJob(jobs[i], function(err, res){
+				if(err) console.log(err);
 				return getJobDetails(i+1, jobs, callback);
-			};
-			if(data.results[0] != undefined) jobs[i].location["formal_address"] = data.results[0].formatted_address;
-			getJobDetails(i+1, jobs, callback);
+			})
+		})
+		.catch(function(err){
+			console.log(err);
+			return getJobDetails(i+1, jobs, callback);
 		})
 	} else {
-		getJobDetails(i+1, jobs, callback);
+		return getJobDetails(i+1, jobs, callback);
 	}
 	
 }
